@@ -1,0 +1,31 @@
+- hosts: all
+  become: true
+  vars:
+    secret_key: "somesecretkey"
+    media_volume_name: "media"
+    media_volume_path: "/var/statics"
+    docker_network_name: "videoarchive"
+
+    mysql_database: videoarchive
+    mysql_user: test
+    mysql_password: test
+    mysql_root_password: root
+    mysql_host: "mysql"
+    mysql_port: "3306"
+
+    rabbitmq_user: guest
+    rabbitmq_pass: guest
+    rabbitmq_host: rabbitmq
+    rabbitmq_port: "5672"
+    rabbitmq_image: "rabbitmq:management"
+
+    nginx_base_url: http://localhost:8080/statics
+
+    videoarchive_host: "videoarchive:8000"
+  roles:
+    - init
+    - mysql
+    - rabbitmq
+    - nginx
+    - videoarchive
+    - celery

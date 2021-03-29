@@ -1,0 +1,4 @@
+nginx_version: "0.1.0"
+nginx_config_path: /tmp/nginx.default.conf
+
+videoarchive_host: "localhost:8080"

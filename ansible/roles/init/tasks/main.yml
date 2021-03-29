@@ -1,0 +1,25 @@
+- name: install docker
+  include_role:
+    name: geerlingguy.docker
+
+- name: install python pip
+  apt:
+    name: python-pip
+    state: present
+
+- name: install python-backports.ssl-match-hostname
+  apt:
+    name: python-backports.ssl-match-hostname
+    state: present
+
+- name: install python docker client
+  pip:
+    name: docker
+
+- name: create docker network
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+  
+- name: Create a volume
+  community.docker.docker_volume:
+    name: "{{ media_volume_name }}"

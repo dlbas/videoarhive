@@ -1,0 +1,56 @@
+- name: do migrations
+  community.docker.docker_container:
+    name: videoarchive-migration-runner
+    image: dlbas/videoarchive-django:{{ videoarchive_version }}
+    volumes:
+    - "{{ media_volume_name }}:{{ media_volume_path }}"
+    networks:
+    - name: "{{ docker_network_name }}"
+    env:
+      SECRET_KEY: "{{ secret_key }}"
+      MEDIA_PATH: "{{ media_volume_path }}"
+      NGINX_BASE_URL: http://localhost:8080/statics/
+
+      DB_NAME: "{{ mysql_database }}"
+      DB_HOST: "{{ mysql_host }}"
+      DB_PORT: "{{ mysql_port }}"
+      DB_USER: "{{ mysql_user }}"
+      DB_PASSWORD: "{{ mysql_password }}"
+    working_dir: /app/videoarchive
+    command: python3 manage.py migrate
+    auto_remove: true
+
+- name: remove temporary file
+  file:
+    state: absent
+    path: "/tmp/uwsgi.ini"
+
+- name: create uwsgi config
+  ansible.builtin.template:
+    src: templates/uwsgi.ini.j2
+    dest: "/tmp/uwsgi.ini"
+
+- name: start videoarchive container
+  community.docker.docker_container:
+    recreate: true
+    name: videoarchive
+    image: dlbas/videoarchive-django:{{ videoarchive_version }}
+    volumes:
+    - "{{ media_volume_name }}:{{ media_volume_path }}"
+    - "/tmp/uwsgi.ini:/app/uwsgi.ini"
+    networks:
+    - name: "{{ docker_network_name }}"
+    env:
+      DEBUG: "1"
+      SECRET_KEY: "{{ secret_key }}"
+      MEDIA_PATH: "{{ media_volume_path }}"
+      NGINX_BASE_URL: http://localhost:8080/statics/
+
+      DB_NAME: "{{ mysql_database }}"
+      DB_HOST: "{{ mysql_host }}"
+      DB_PORT: "{{ mysql_port }}"
+      DB_USER: "{{ mysql_user }}"
+      DB_PASSWORD: "{{ mysql_password }}"
+
+      CELERY_BROKER_URL: amqp://{{ rabbitmq_user }}:{{ rabbitmq_pass }}@{{ rabbitmq_host }}:{{ rabbitmq_port }}
+    restart_policy: always

@@ -1,0 +1,14 @@
+- name: start rabbitmq container
+  community.docker.docker_container:
+    name: rabbitmq
+    image: "{{ rabbitmq_image }}"
+    recreate: true
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+    - name: "{{ docker_network_name }}"
+    env:
+      RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
+      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_pass }}"
+    restart_policy: always

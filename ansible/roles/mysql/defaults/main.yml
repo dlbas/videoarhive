@@ -1,0 +1,7 @@
+mysql_image: "mariadb:latest"
+mysql_volume_name: mysql
+
+mysql_database: videoarchive
+mysql_user: test
+mysql_password: test
+mysql_root_password: root

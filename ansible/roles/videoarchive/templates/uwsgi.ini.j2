@@ -9,6 +9,4 @@ max-requests = 5000
 plugin = http,python3
 plugins-dir = /lib/uwsgi/plugins
 socket = /tmp/uwsgi.sock
-processes=4
-# uid=1000
-# gid=2000
+processes={{ uwsgi_processes }}

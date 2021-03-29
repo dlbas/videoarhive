@@ -1,0 +1,4 @@
+rabbitmq_image: "rabbitmq:management"
+
+rabbitmq_user: guest
+rabbitmq_pass: guest

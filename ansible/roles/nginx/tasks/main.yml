@@ -1,0 +1,23 @@
+- name: remove temporary file
+  file:
+    state: absent
+    path: "{{ nginx_config_path }}"
+
+- name: move nginx config template to tmp dir
+  ansible.builtin.template:
+    src: templates/default.conf.j2
+    dest: "{{ nginx_config_path }}"
+
+- name: start nginx container
+  community.docker.docker_container:
+    recreate: true
+    name: nginx
+    image: nginx:1.19.8
+    volumes:
+      - "{{ media_volume_name }}:{{ media_volume_path }}"
+      - "{{ nginx_config_path }}:/etc/nginx/conf.d/default.conf"
+    ports:
+      - "8080:80"
+    networks:
+      - name: "{{ docker_network_name }}"
+    restart_policy: always

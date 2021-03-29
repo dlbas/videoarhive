@@ -1,0 +1,19 @@
+- name: start celery container
+  community.docker.docker_container:
+    recreate: true
+    name: celery
+    image: dlbas/videoarchive-celery:{{ celery_version }}
+    volumes:
+    - "{{ media_volume_name }}:{{ media_volume_path }}"
+    networks:
+    - name: "{{ docker_network_name }}"
+    env:
+      MEDIA_PATH: "{{ media_volume_path }}"
+      SECRET_KEY: "{{ secret_key }}"
+      DB_NAME: "{{ mysql_database }}"
+      DB_HOST: "{{ mysql_host }}"
+      DB_PORT: "{{ mysql_port }}"
+      DB_USER: "{{ mysql_user }}"
+      DB_PASSWORD: "{{ mysql_password }}"
+      CELERY_BROKER_URL: amqp://{{ rabbitmq_user }}:{{ rabbitmq_pass }}@{{ rabbitmq_host }}:{{ rabbitmq_port }}
+    restart_policy: always
