@@ -1,0 +1,77 @@
+version: "3"
+services:
+  videoarchive:
+    depends_on:
+      - mysql
+    build:
+      context: ./application
+      dockerfile: Dockerfile.server
+    volumes:
+      - media:/var/statics/
+    env_file: ./.env
+    expose:
+      - 8000
+    networks:
+      - videoarchive
+
+  celery:
+    depends_on:
+      - rabbitmq
+    build:
+      context: ./application
+      dockerfile: Dockerfile.celery
+    volumes:
+      - media:/var/statics/
+    env_file: ./.env
+    networks:
+      - videoarchive
+  
+  nginx:
+    depends_on:
+      - videoarchive
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - media:/var/statics/
+    ports:
+      - "8080:80"
+    env_file: ./.env
+    networks:
+      - videoarchive
+  
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    expose:
+      - 5672
+      - 15672
+    ports:
+      - "15672:15672"
+    env_file: ./.env
+    networks:
+      - videoarchive
+
+  mysql:
+    image: mariadb
+    expose:
+      - 3306
+    env_file: ./.env
+    networks:
+      - videoarchive
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+volumes:
+  media:
+  db:
+  
+networks:
+  videoarchive:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
